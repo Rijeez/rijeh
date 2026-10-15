@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Planner</title>
+    <!-- Tailwind CSS untuk styling cepat -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas untuk fitur download tiket -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #fdf2f8; /* Pink pastel */
+            background-image: radial-gradient(#f9a8d4 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .card-shadow {
+            box-shadow: 8px 8px 0px 0px #f472b6;
+            border: 2px solid #be185d;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0px 0px #9d174d;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex items-center justify-center overflow-hidden relative">
+
+    <!-- STEP 1: WELCOME -->
+    <div id="step-1" class="text-center transition-all duration-500">
+        <h1 class="text-3xl font-black text-pink-600 mb-6">💌 From Rijeeh For You</h1>
+        <button onclick="nextStep(2)" class="bg-pink-500 text-white px-6 py-3 rounded-xl font-bold border-2 border-pink-700 btn-hover transition-all">
+            Buka Suratnya
+        </button>
+    </div>
+
+    <!-- STEP 2: THE QUESTION -->
+<div id="step-2" class="hidden bg-white p-8 rounded-2xl card-shadow max-w-sm w-full text-center relative min-h-[250px]">
+    <div class="text-4xl mb-4">🐱💖</div>
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Mau jalan-jalan bareng aku ga?</h2>
+    <div class="flex justify-center gap-4">
+        <button onclick="nextStep(3)" class="bg-green-400 text-white px-6 py-2 rounded-lg font-bold border-2 border-green-600 z-10">YES</button>
+        <button id="btn-no" class="bg-red-400 text-white px-6 py-2 rounded-lg font-bold border-2 border-red-600 transition-all duration-200">NO</button>
+    </div>
+</div>
+
+    <!-- STEP 3: DATE & TIME -->
+    <div id="step-3" class="hidden bg-white p-8 rounded-2xl card-shadow max-w-sm w-full text-center">
+        <p class="text-pink-500 font-bold text-sm mb-2">buat Ayang</p>
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Kapan sayangku free?</h2>
+        <input type="date" id="date-input" class="w-full mb-4 p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:border-pink-500">
+        <input type="time" id="time-input" class="w-full mb-6 p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:border-pink-500">
+        <button onclick="saveDate()" class="w-full bg-pink-500 text-white px-6 py-3 rounded-xl font-bold border-2 border-pink-700 btn-hover">Lanjut 💖</button>
+    </div>
+
+    <!-- STEP 4: ACTIVITIES -->
+    <div id="step-4" class="hidden bg-white p-8 rounded-2xl card-shadow max-w-md w-full text-center">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Nanti kita ngapain?</h2>
+        <div class="grid grid-cols-2 gap-3 mb-6 text-left">
+            <label class="flex items-center gap-2 p-2 border-2 border-pink-100 rounded-lg cursor-pointer hover:bg-pink-50">
+                <input type="checkbox" value="Nonton Film" class="activity-cb w-5 h-5 accent-pink-500"> Nonton Film
+            </label>
+            <label class="flex items-center gap-2 p-2 border-2 border-pink-100 rounded-lg cursor-pointer hover:bg-pink-50">
+                <input type="checkbox" value="Jalan-jalan" class="activity-cb w-5 h-5 accent-pink-500"> Jalan-jalan
+            </label>
+            <label class="flex items-center gap-2 p-2 border-2 border-pink-100 rounded-lg cursor-pointer hover:bg-pink-50">
+                <input type="checkbox" value="Makan Enak" class="activity-cb w-5 h-5 accent-pink-500"> Makan Enak
+            </label>
+            <label class="flex items-center gap-2 p-2 border-2 border-pink-100 rounded-lg cursor-pointer hover:bg-pink-50">
+                <input type="checkbox" value="Photobox" class="activity-cb w-5 h-5 accent-pink-500"> Photobox
+            </label>
+        </div>
+        <button onclick="saveActivities()" class="w-full bg-pink-500 text-white px-6 py-3 rounded-xl font-bold border-2 border-pink-700 btn-hover">Oke!</button>
+    </div>
+
+    <!-- STEP 5: MESSAGE -->
+    <div id="step-5" class="hidden bg-white p-8 rounded-2xl card-shadow max-w-sm w-full text-center">
+        <p class="text-pink-500 font-bold text-sm mb-2">Terakhir...</p>
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Ada pesan buat Rijeeh?</h2>
+        <textarea id="msg-input" rows="3" placeholder="Tulis pesan kamu di sini..." class="w-full mb-6 p-3 border-2 border-pink-300 rounded-lg focus:outline-none focus:border-pink-500"></textarea>
+        <button onclick="generateTicket()" class="w-full bg-pink-500 text-white px-6 py-3 rounded-xl font-bold border-2 border-pink-700 btn-hover">Bikin Tiketnya ✨</button>
+    </div>
+
+    <!-- STEP 6: FINAL TICKET -->
+    <div id="step-6" class="hidden flex-col items-center max-w-md w-full">
+        <!-- Area Tiket yang akan di-download -->
+        <div id="ticket-area" class="bg-[#fff5f5] p-6 rounded-2xl border-2 border-pink-300 shadow-xl w-full relative mb-6">
+            <h1 class="text-2xl font-black text-pink-600 mb-6 text-center border-b-2 border-dashed border-pink-300 pb-4">Yeay, it's a date! 🎉</h1>
+            
+            <div class="space-y-4 text-gray-700">
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">👦🏻</span>
+                    <div>
+                        <p class="text-xs font-bold text-pink-400 uppercase">Untuk</p>
+                        <p class="font-bold">Rijeeh</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">📅</span>
+                    <div>
+                        <p class="text-xs font-bold text-pink-400 uppercase">Kapan</p>
+                        <p id="res-date" class="font-bold">-</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">🎡</span>
+                    <div>
+                        <p class="text-xs font-bold text-pink-400 uppercase">Agenda</p>
+                        <p id="res-agenda" class="font-bold">-</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-xl">💌</span>
+                    <div>
+                        <p class="text-xs font-bold text-pink-400 uppercase">Pesan</p>
+                        <p id="res-msg" class="font-bold italic">-</p>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-sm font-bold text-pink-500 mt-8">See you soon! 💖</p>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex gap-4 w-full">
+            <button onclick="downloadTicket()" class="flex-1 bg-white text-pink-600 px-4 py-3 rounded-xl font-bold border-2 border-pink-600 btn-hover">📥 Simpan Tiket</button>
+            <button onclick="sendWhatsApp()" class="flex-1 bg-green-500 text-white px-4 py-3 rounded-xl font-bold border-2 border-green-700 btn-hover">💬 Kirim WA</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Data Store
+        let dateData = { date: '', time: '', activities: [], message: '' };
+
+        // Navigasi antar step
+        function nextStep(stepNum) {
+            document.querySelectorAll('body > div').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`step-${stepNum}`).classList.remove('hidden');
+        }
+
+        // Logic Tombol NO yang kabur (support Laptop & HP)
+const btnNo = document.getElementById('btn-no');
+const card2 = document.getElementById('step-2');
+
+function moveNoButton() {
+    // Hitung batas aman di dalam kotak/card
+    const maxX = card2.clientWidth - btnNo.clientWidth - 20;
+    const maxY = card2.clientHeight - btnNo.clientHeight - 20;
+
+    const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+    const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+    btnNo.style.position = 'absolute';
+    btnNo.style.left = `${randomX}px`;
+    btnNo.style.top = `${randomY}px`;
+}
+
+// Kabur saat kursor menempel (Laptop)
+btnNo.addEventListener('mouseover', moveNoButton);
+
+// Kabur saat mau disentuh (HP)
+btnNo.addEventListener('touchstart', function(e) {
+    e.preventDefault(); // Cegah terklik di HP
+    moveNoButton();
+});
+
+        // Simpan Tanggal
+        function saveDate() {
+            const d = document.getElementById('date-input').value;
+            const t = document.getElementById('time-input').value;
+            if(!d || !t) return alert('Isi tanggal dan jamnya dulu ya! 🥺');
+            dateData.date = `${d} jam ${t}`;
+            nextStep(4);
+        }
+
+        // Simpan Aktivitas
+        function saveActivities() {
+            const checkboxes = document.querySelectorAll('.activity-cb:checked');
+            if(checkboxes.length === 0) return alert('Pilih minimal 1 aktivitas dong! 🥺');
+            checkboxes.forEach(cb => dateData.activities.push(cb.value));
+            nextStep(5);
+        }
+
+        // Generate Tiket Akhir
+        function generateTicket() {
+            dateData.message = document.getElementById('msg-input').value || 'Tidak ada pesan khusus';
+            
+            // Masukkan data ke HTML Tiket
+            document.getElementById('res-date').innerText = dateData.date;
+            document.getElementById('res-agenda').innerText = dateData.activities.join(', ');
+            document.getElementById('res-msg').innerText = dateData.message;
+            
+            nextStep(6);
+        }
+
+        // Download Tiket sebagai Gambar
+        function downloadTicket() {
+            const ticket = document.getElementById('ticket-area');
+            html2canvas(ticket, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Tiket_Kencan_Rijeeh.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Kirim hasil ke WhatsApp
+        function sendWhatsApp() {
+            // GANTI NOMOR INI dengan nomor WA kamu (gunakan format 62...)
+            const noWA = "6281234567890"; 
+            const textWA = `Yeay it's a date! 🎉\n\n📅 Kapan: ${dateData.date}\n🎡 Agenda: ${dateData.activities.join(', ')}\n💌 Pesan: ${dateData.message}\n\nCan't wait! 💖`;
+            
+            const encodedText = encodeURIComponent(textWA);
+            window.open(`https://wa.me/${noWA}?text=${encodedText}`, '_blank');
+        }
+    </script>
+</body>
+</html>
